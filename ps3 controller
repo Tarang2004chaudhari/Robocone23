@@ -1,0 +1,117 @@
+#include <PS3BT.h>
+#include <usbhub.h>
+
+// Satisfy the IDE, which needs to see the include statment in the ino too.
+#ifdef dobogusinclude
+#include <spi4teensy3.h>
+#endif
+#include <SPI.h>
+class motor{
+  public:
+   const int dir;
+   const int pwm;
+};
+
+ motor motor1={3,7};
+  motor motor2={4,8};
+   motor motor3={5,9};
+    motor motor4={6,10};
+ USB Usb;
+BTD Btd(&Usb); 
+PS3BT PS3(&Btd); 
+
+void ps3_start(){
+    Serial.begin(115200);
+#if !defined(MIPSEL)
+  while (!Serial); 
+#endif
+  if (Usb.Init() == -1) {
+    Serial.print(F("\r\nOSC did not start"));
+    while (1);
+  }
+  Serial.print(F("\r\nPS3 Bluetooth Library Started"));
+}
+class  val{
+   public:
+   int x,y;
+   int eqn_x();
+  int eqn_y();
+ };
+ int val ::eqn_x(){
+    x = 2*((PS3.getAnalogHat(LeftHatX)-130));
+    return x;
+    
+ }
+  int val::eqn_y(){
+   y = 2*(129 - (PS3.getAnalogHat(LeftHatY)));
+   return y;
+ }
+  
+  
+  
+ int  eqn1(int x,int y){
+   return (0.7071*x + 0.7071*y)*0.7352;  
+ }
+ // function for direction
+void direction(const int x1,const int y1,int value){
+     
+        digitalWrite(x1, LOW);
+        analogWrite(y1, value);
+}
+void direction1(const int x1,const int y1,int value){
+  
+          digitalWrite(x1, HIGH);
+           analogWrite(y1, value);
+}
+
+void setup() {
+
+     pinMode(motor1.dir, OUTPUT);
+     ps3_start();
+     
+}
+
+void loop() {
+  val v1;
+  Usb.Task();
+  // put your main code here, to run repeatedly:
+
+     if(eqn1(-v1.eqn_x(),v1.eqn_y())<0){
+
+         direction(motor1.dir,motor1.pwm,-eqn1(-v1.eqn_x(),v1.eqn_y()));
+      }
+      else{
+        direction(motor1.dir,motor1.pwm,eqn1(-v1.eqn_x(),v1.eqn_y()));
+      }
+       if(eqn1(-v1.eqn_x(),-v1.eqn_y())<0)
+      {
+               direction(motor2.dir,motor2.pwm,-eqn1(-v1.eqn_x(),-v1.eqn_y()));
+    
+      }
+      else
+      {
+        direction1(motor2.dir,motor2.pwm,-eqn1(-v1.eqn_x(),-v1.eqn_y()));
+      }
+
+      if(eqn1(v1.eqn_x(),-v1.eqn_y())<0)
+      {
+       direction(motor3.dir,motor3.pwm,-eqn1(v1.eqn_x(),-v1.eqn_y()));
+      }
+      else
+      {
+       direction1(motor3.dir,motor3.pwm,eqn1(v1.eqn_x(),-v1.eqn_y()));        
+      }
+
+
+      if(eqn1(v1.eqn_x(),v1.eqn_y())<0)
+      {
+            direction(motor4.dir,motor4.pwm,-eqn1(v1.eqn_x(),v1.eqn_y()));
+      }
+      else
+      {
+            direction(motor4.dir,motor4.pwm,eqn1(v1.eqn_x(),v1.eqn_y()));
+          
+      }
+    
+
+}
